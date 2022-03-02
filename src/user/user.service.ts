@@ -38,16 +38,15 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    if (updateUserDto.email || updateUserDto.cpf) await this.verifyUnique(updateUserDto)
-    const user: User = await this.usersRepository.findOne({ id });
-
+    const user: User = await this.usersRepository.findOne({where: {id} });
+    if ((updateUserDto.email || updateUserDto.cpf) && updateUserDto.email != user.email && updateUserDto.cpf != user.cpf) await this.verifyUnique(updateUserDto)
+    
     if (user) {
       // if (data.senha) {
       //   data.senha = await bcrypt.hash(data.senha, 12)
       // }
       // updateUserDto.updated = new Date()
-      
-      try { return await this.usersRepository.save({ id: id, ...user, ...updateUserDto }); }
+      try { return await this.usersRepository.save({...user, ...updateUserDto }); }
       catch (err) { throw new HttpException({ msg: 'Houve um erro ao concluir a atualização.', error: err }, HttpStatus.INTERNAL_SERVER_ERROR) }
     } else throw new HttpException({ msg: 'Usuario não encontrado', error: null }, HttpStatus.NOT_FOUND);
   }
